@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,97 +8,20 @@ import ProjectCard, { ProjectData } from '@/components/ProjectCard';
 import AnimatedTransition from '@/components/AnimatedTransition';
 import { PlusCircle, Search, Filter } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-
-// Expanded mock data
-const allProjects: ProjectData[] = [
-  {
-    id: '1',
-    title: 'Metro Line Extension Phase II',
-    description: 'Extending the existing metro network to connect the southern suburbs with improved transit options.',
-    status: 'in-progress',
-    location: 'Southern District',
-    deadline: 'Dec 2023',
-    departments: ['Transportation', 'Urban Planning', 'Finance'],
-  },
-  {
-    id: '2',
-    title: 'Smart Water Management System',
-    description: 'Implementing IoT-based water monitoring and management systems across the city.',
-    status: 'planning',
-    location: 'Citywide',
-    deadline: 'Mar 2024',
-    departments: ['Water Supply', 'IT', 'Environment'],
-  },
-  {
-    id: '3',
-    title: 'Urban Green Spaces Development',
-    description: 'Creating new parks and green areas to improve air quality and provide recreational spaces.',
-    status: 'on-hold',
-    location: 'Northern District',
-    deadline: 'Jun 2024',
-    departments: ['Parks', 'Urban Planning', 'Environment'],
-  },
-  {
-    id: '4',
-    title: 'Solar Panel Installation on Government Buildings',
-    description: 'Installing solar panels on all government buildings to reduce carbon footprint and energy costs.',
-    status: 'planning',
-    location: 'Citywide',
-    deadline: 'Jul 2024',
-    departments: ['Energy', 'Public Works', 'Finance'],
-  },
-  {
-    id: '5',
-    title: 'Public Housing Renovation Program',
-    description: 'Renovating existing public housing units to improve living conditions and energy efficiency.',
-    status: 'in-progress',
-    location: 'Eastern District',
-    deadline: 'Sep 2023',
-    departments: ['Housing', 'Public Works'],
-  },
-  {
-    id: '6',
-    title: 'Smart Traffic Management System',
-    description: 'Implementing AI-powered traffic management to reduce congestion and improve traffic flow.',
-    status: 'completed',
-    location: 'Central District',
-    deadline: 'Jan 2023',
-    departments: ['Transportation', 'IT', 'Police'],
-  },
-  {
-    id: '7',
-    title: 'Community Healthcare Centers Expansion',
-    description: 'Building new community health centers to improve healthcare accessibility in underserved areas.',
-    status: 'in-progress',
-    location: 'Multiple Districts',
-    deadline: 'Nov 2023',
-    departments: ['Health', 'Urban Planning', 'Finance'],
-  },
-  {
-    id: '8',
-    title: 'Waste Management Modernization',
-    description: 'Modernizing waste collection and recycling processes to improve efficiency and sustainability.',
-    status: 'delayed',
-    location: 'Citywide',
-    deadline: 'Feb 2023',
-    departments: ['Sanitation', 'Environment', 'IT'],
-  },
-  {
-    id: '9',
-    title: 'Flood Control Infrastructure Improvement',
-    description: 'Upgrading drainage systems and implementing flood control measures in flood-prone areas.',
-    status: 'in-progress',
-    location: 'Coastal Districts',
-    deadline: 'May 2024',
-    departments: ['Water Management', 'Public Works', 'Urban Planning'],
-  },
-];
+import { getProjects } from '@/services/databaseService';
 
 const Projects = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [projects, setProjects] = useState<ProjectData[]>([]);
 
-  const filteredProjects = allProjects.filter((project) => {
+  useEffect(() => {
+    // Fetch projects from the database
+    const fetchedProjects = getProjects();
+    setProjects(fetchedProjects);
+  }, []);
+
+  const filteredProjects = projects.filter((project) => {
     const matchesSearch = 
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||

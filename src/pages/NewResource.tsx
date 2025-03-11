@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import AnimatedTransition from '@/components/AnimatedTransition';
 import GlassmorphicCard from '@/components/GlassmorphicCard';
 import Navbar from '@/components/Navbar';
 import { Upload } from 'lucide-react';
+import { createResource } from '@/services/databaseService';
 
 // Mock department data
 const departments = [
@@ -77,12 +77,24 @@ const NewResource = () => {
     
     setIsLoading(true);
     
-    // Simulate resource creation
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Create the resource in the database
+      createResource({
+        title: formData.title,
+        description: formData.description,
+        department: formData.department,
+        type: formData.type,
+        author: formData.author,
+        fileUrl: file ? URL.createObjectURL(file) : undefined,
+      });
+      
       toast.success('Resource added successfully!');
       navigate('/resources');
-    }, 1000);
+    } catch (error) {
+      toast.error('Failed to add resource: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

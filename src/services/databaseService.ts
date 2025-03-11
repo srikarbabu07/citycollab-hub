@@ -15,7 +15,7 @@ export interface Project {
   id: string;
   title: string;
   description: string;
-  status: 'planning' | 'in-progress' | 'completed' | 'on-hold';
+  status: 'planning' | 'in-progress' | 'completed' | 'on-hold' | 'delayed';
   location: string;
   deadline: string;
   departments: string[];
@@ -56,11 +56,55 @@ const initializeStorage = () => {
   }
 
   if (!localStorage.getItem(PROJECTS_KEY)) {
-    localStorage.setItem(PROJECTS_KEY, JSON.stringify([]));
+    const initialProjects: Project[] = [
+      {
+        id: '1',
+        title: 'Metro Line Extension Phase II',
+        description: 'Extending the existing metro network to connect the southern suburbs with improved transit options.',
+        status: 'in-progress',
+        location: 'Southern District',
+        deadline: new Date(2023, 11, 31).toISOString(),
+        departments: ['transportation', 'urban-planning', 'finance'],
+        createdBy: 'admin@city.gov.in',
+        createdAt: new Date(2023, 6, 15).toISOString(),
+      },
+      {
+        id: '2',
+        title: 'Smart Water Management System',
+        description: 'Implementing IoT-based water monitoring and management systems across the city.',
+        status: 'planning',
+        location: 'Citywide',
+        deadline: new Date(2024, 2, 31).toISOString(),
+        departments: ['water-supply', 'it', 'environment'],
+        createdBy: 'admin@city.gov.in',
+        createdAt: new Date(2023, 8, 10).toISOString(),
+      },
+    ];
+    localStorage.setItem(PROJECTS_KEY, JSON.stringify(initialProjects));
   }
 
   if (!localStorage.getItem(RESOURCES_KEY)) {
-    localStorage.setItem(RESOURCES_KEY, JSON.stringify([]));
+    const initialResources: Resource[] = [
+      {
+        id: '1',
+        title: 'Urban Planning Guidelines 2023',
+        description: 'Comprehensive guidelines for sustainable urban development and planning.',
+        department: 'urban-planning',
+        type: 'document',
+        author: 'Planning Commission',
+        createdAt: new Date(2023, 5, 20).toISOString(),
+      },
+      {
+        id: '2',
+        title: 'Traffic Flow Dataset',
+        description: 'City-wide traffic flow data collected from sensors installed at major intersections.',
+        department: 'transportation',
+        type: 'dataset',
+        author: 'Traffic Department',
+        createdAt: new Date(2023, 7, 5).toISOString(),
+      },
+    ];
+    localStorage.setItem(RESOURCES_KEY, JSON.stringify(initialResources));
   }
 };
 
@@ -142,6 +186,11 @@ export const createProject = (project: Omit<Project, 'id' | 'createdAt' | 'creat
   return newProject;
 };
 
+export const getProjectById = (id: string): Project | null => {
+  const projects = getProjects();
+  return projects.find(project => project.id === id) || null;
+};
+
 // Resource management
 export const getResources = (): Resource[] => {
   return JSON.parse(localStorage.getItem(RESOURCES_KEY) || '[]');
@@ -160,6 +209,18 @@ export const createResource = (resource: Omit<Resource, 'id' | 'createdAt'>): Re
   localStorage.setItem(RESOURCES_KEY, JSON.stringify(resources));
   
   return newResource;
+};
+
+export const getResourceById = (id: string): Resource | null => {
+  const resources = getResources();
+  return resources.find(resource => resource.id === id) || null;
+};
+
+// File storage helpers (simulated)
+export const storeFile = (file: File): string => {
+  // In a real implementation, this would upload the file to a server or cloud storage
+  // For now, we'll just return a fake URL
+  return URL.createObjectURL(file);
 };
 
 // MongoDB migration instructions
@@ -188,4 +249,27 @@ Example MongoDB implementation would use:
 - Connection string to your MongoDB instance
 - Similar CRUD methods, but using MongoDB APIs
 
+MongoDB connection example:
+```javascript
+import { MongoClient } from 'mongodb';
+
+const uri = 'mongodb://localhost:27017/city_development';
+const client = new MongoClient(uri);
+
+async function connectToDatabase() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+    return client.db('city_development');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    throw error;
+  }
+}
+
+export async function getProjects() {
+  const db = await connectToDatabase();
+  return db.collection('projects').find({}).toArray();
+}
+```
 */

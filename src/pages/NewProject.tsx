@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,7 @@ import AnimatedTransition from '@/components/AnimatedTransition';
 import GlassmorphicCard from '@/components/GlassmorphicCard';
 import Navbar from '@/components/Navbar';
 import { CalendarIcon, X } from 'lucide-react';
+import { createProject } from '@/services/databaseService';
 
 // Mock department data
 const departments = [
@@ -73,12 +73,24 @@ const NewProject = () => {
     
     setIsLoading(true);
     
-    // Simulate project creation
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Create the project in the database
+      createProject({
+        title: formData.title,
+        description: formData.description,
+        status: formData.status as 'planning' | 'in-progress' | 'completed' | 'on-hold',
+        location: formData.location,
+        deadline: deadline.toISOString(),
+        departments: selectedDepartments,
+      });
+      
       toast.success('Project created successfully!');
       navigate('/projects');
-    }, 1000);
+    } catch (error) {
+      toast.error('Failed to create project: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

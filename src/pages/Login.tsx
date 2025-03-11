@@ -7,34 +7,40 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import AnimatedTransition from '@/components/AnimatedTransition';
 import GlassmorphicCard from '@/components/GlassmorphicCard';
-import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import CityMap from '@/components/CityMap';
+import { loginUser } from '@/services/databaseService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
   
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulating authentication
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // Mock login logic - in a real app this would validate credentials
-      if (email && password) {
-        // For demo purposes, we'll accept any non-empty credentials
-        localStorage.setItem('jd_user', JSON.stringify({ email, name: email.split('@')[0] }));
-        toast.success('Successfully logged in!');
-        navigate('/dashboard');
+    try {
+      // Attempt to login with database service
+      const user = loginUser(email, password);
+      toast.success('Successfully logged in!');
+      navigate('/dashboard');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(err.message);
       } else {
-        toast.error('Please enter both email and password.');
+        setError('Failed to login');
+        toast.error('Failed to login');
       }
-    }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleShowPassword = () => {
@@ -108,6 +114,10 @@ const Login = () => {
                 </div>
               </div>
 
+              {error && (
+                <div className="text-sm text-red-600">{error}</div>
+              )}
+
               <div>
                 <Button
                   type="submit"
@@ -146,6 +156,43 @@ const Login = () => {
               </p>
             </div>
           </GlassmorphicCard>
+        </AnimatedTransition>
+      </div>
+
+      {/* Map section */}
+      <div className="mt-16 sm:mx-auto sm:w-full sm:max-w-6xl px-4">
+        <AnimatedTransition animation="fade-in" delay="0.3s">
+          <h3 className="text-center text-2xl font-bold tracking-tight mb-8">
+            Streamline City Development
+          </h3>
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-xl font-semibold mb-2">Unified Project Management</h4>
+                <p className="text-jd-gray">
+                  Track project progress across departments and ensure alignment with city-wide objectives.
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="text-xl font-semibold mb-2">Centralized Resource Hub</h4>
+                <p className="text-jd-gray">
+                  Access and share critical resources, datasets, and documents from a single location.
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="text-xl font-semibold mb-2">Departmental Collaboration</h4>
+                <p className="text-jd-gray">
+                  Break down silos and facilitate communication between city departments.
+                </p>
+              </div>
+            </div>
+            
+            <div className="h-[400px] rounded-2xl overflow-hidden">
+              <CityMap className="h-full w-full" />
+            </div>
+          </div>
         </AnimatedTransition>
       </div>
     </div>

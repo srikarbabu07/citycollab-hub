@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import AnimatedTransition from '@/components/AnimatedTransition';
 import GlassmorphicCard from '@/components/GlassmorphicCard';
-import { Eye, EyeOff, Building } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { registerUser } from '@/services/databaseService';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -18,6 +19,7 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
   
   const navigate = useNavigate();
 
@@ -36,29 +38,40 @@ const Signup = () => {
     "Other"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
     if (password !== confirmPassword) {
+      setError("Passwords don't match!");
       toast.error("Passwords don't match!");
       return;
     }
     
     setIsLoading(true);
     
-    // Simulating registration process
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Register user with database service
+      const user = registerUser({
+        name,
+        email,
+        department,
+        password
+      });
       
-      if (name && email && department && password) {
-        // Store user data in localStorage (in a real app, this would be sent to a backend)
-        localStorage.setItem('jd_user', JSON.stringify({ name, email, department }));
-        toast.success('Account created successfully!');
-        navigate('/dashboard');
+      toast.success('Account created successfully!');
+      navigate('/dashboard');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(err.message);
       } else {
-        toast.error('Please fill in all fields');
+        setError('Failed to create account');
+        toast.error('Failed to create account');
       }
-    }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleShowPassword = () => {
@@ -171,6 +184,10 @@ const Signup = () => {
                   />
                 </div>
               </div>
+
+              {error && (
+                <div className="text-sm text-red-600">{error}</div>
+              )}
 
               <div>
                 <Button

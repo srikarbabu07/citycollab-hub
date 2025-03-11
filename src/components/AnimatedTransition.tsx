@@ -15,9 +15,17 @@ const AnimatedTransition: React.FC<AnimatedTransitionProps> = ({
   animation = 'fade-in',
   delay = '0s',
 }) => {
+  const animationClasses = {
+    'fade-in': 'animate-fade-in',
+    'slide-up': 'animate-slide-up',
+    'slide-down': 'animate-slide-down',
+    'scale-in': 'animate-scale-in',
+    'blur-in': 'animate-blur-in',
+  };
+
   return (
     <div
-      className={cn(`animate-${animation}`, className)}
+      className={cn(animationClasses[animation], className)}
       style={{ animationDelay: delay }}
     >
       {children}

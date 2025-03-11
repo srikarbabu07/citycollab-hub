@@ -7,51 +7,69 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import AnimatedTransition from '@/components/AnimatedTransition';
+import GlassmorphicCard from '@/components/GlassmorphicCard';
+import { Eye, EyeOff, Building } from 'lucide-react';
 
 const Signup = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    department: '',
-  });
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [department, setDepartment] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, department: value }));
-  };
+  const departments = [
+    "Urban Planning",
+    "Public Works",
+    "Water Supply",
+    "Sewerage",
+    "Solid Waste Management",
+    "Smart City Mission",
+    "Municipal Administration",
+    "Transport",
+    "Electricity",
+    "Environment",
+    "Health",
+    "Other"
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+    if (password !== confirmPassword) {
+      toast.error("Passwords don't match!");
       return;
     }
     
     setIsLoading(true);
     
-    // Simulating registration
+    // Simulating registration process
     setTimeout(() => {
       setIsLoading(false);
-      toast.success('Account created successfully!');
-      navigate('/login');
+      
+      if (name && email && department && password) {
+        // Store user data in localStorage (in a real app, this would be sent to a backend)
+        localStorage.setItem('jd_user', JSON.stringify({ name, email, department }));
+        toast.success('Account created successfully!');
+        navigate('/dashboard');
+      } else {
+        toast.error('Please fill in all fields');
+      }
     }, 1000);
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-blue-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <AnimatedTransition animation="fade-in">
-          <h2 className="text-center text-3xl font-bold tracking-tight">
+          <h2 className="text-center text-3xl font-bold tracking-tight mb-2">
             Create your JD account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -62,7 +80,7 @@ const Signup = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <AnimatedTransition animation="scale-in" delay="0.1s">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 backdrop-blur-sm border border-gray-100">
+          <GlassmorphicCard className="py-8 px-4 sm:px-10">
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <Label htmlFor="name">Full Name</Label>
@@ -72,8 +90,8 @@ const Signup = () => {
                     name="name"
                     type="text"
                     required
-                    value={formData.name}
-                    onChange={handleChange}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="block w-full"
                   />
                 </div>
@@ -88,8 +106,8 @@ const Signup = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    value={formData.email}
-                    onChange={handleChange}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="block w-full"
                   />
                 </div>
@@ -98,19 +116,16 @@ const Signup = () => {
               <div>
                 <Label htmlFor="department">Department</Label>
                 <div className="mt-1">
-                  <Select onValueChange={handleSelectChange} value={formData.department}>
+                  <Select onValueChange={setDepartment} value={department}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder="Select your department" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="urban-planning">Urban Planning</SelectItem>
-                      <SelectItem value="transportation">Transportation</SelectItem>
-                      <SelectItem value="water-supply">Water Supply</SelectItem>
-                      <SelectItem value="sanitation">Sanitation</SelectItem>
-                      <SelectItem value="energy">Energy</SelectItem>
-                      <SelectItem value="housing">Housing</SelectItem>
-                      <SelectItem value="health">Health</SelectItem>
-                      <SelectItem value="education">Education</SelectItem>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept} value={dept}>
+                          {dept}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -118,29 +133,40 @@ const Signup = () => {
 
               <div>
                 <Label htmlFor="password">Password</Label>
-                <div className="mt-1">
+                <div className="mt-1 relative">
                   <Input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="block w-full"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full pr-10"
                   />
+                  <button
+                    type="button"
+                    onClick={toggleShowPassword}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirm-password">Confirm Password</Label>
                 <div className="mt-1">
                   <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
+                    id="confirm-password"
+                    name="confirm-password"
+                    type={showPassword ? "text" : "password"}
                     required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     className="block w-full"
                   />
                 </div>
@@ -165,7 +191,7 @@ const Signup = () => {
                 </Link>
               </p>
             </div>
-          </div>
+          </GlassmorphicCard>
         </AnimatedTransition>
       </div>
     </div>

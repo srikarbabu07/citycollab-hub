@@ -6,11 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import AnimatedTransition from '@/components/AnimatedTransition';
+import GlassmorphicCard from '@/components/GlassmorphicCard';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const navigate = useNavigate();
 
@@ -21,21 +24,28 @@ const Login = () => {
     // Simulating authentication
     setTimeout(() => {
       setIsLoading(false);
+      
       // Mock login logic - in a real app this would validate credentials
       if (email && password) {
+        // For demo purposes, we'll accept any non-empty credentials
+        localStorage.setItem('jd_user', JSON.stringify({ email, name: email.split('@')[0] }));
         toast.success('Successfully logged in!');
         navigate('/dashboard');
       } else {
-        toast.error('Invalid credentials. Please try again.');
+        toast.error('Please enter both email and password.');
       }
     }, 1000);
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-blue-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <AnimatedTransition animation="fade-in">
-          <h2 className="text-center text-3xl font-bold tracking-tight">
+          <h2 className="text-center text-3xl font-bold tracking-tight mb-2">
             Sign in to JD
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -46,7 +56,7 @@ const Login = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <AnimatedTransition animation="scale-in" delay="0.1s">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 backdrop-blur-sm border border-gray-100">
+          <GlassmorphicCard className="py-8 px-4 sm:px-10">
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <Label htmlFor="email">Email address</Label>
@@ -68,22 +78,33 @@ const Login = () => {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
                   <div className="text-sm">
-                    <a href="#" className="font-medium text-jd-blue hover:text-jd-blue/80">
+                    <Link to="#" className="font-medium text-jd-blue hover:text-jd-blue/80">
                       Forgot your password?
-                    </a>
+                    </Link>
                   </div>
                 </div>
-                <div className="mt-1">
+                <div className="mt-1 relative">
                   <Input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full"
+                    className="block w-full pr-10"
                   />
+                  <button
+                    type="button"
+                    onClick={toggleShowPassword}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -104,7 +125,7 @@ const Login = () => {
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Demo Credentials</span>
+                  <span className="px-2 bg-white bg-opacity-70 text-gray-500">Demo Credentials</span>
                 </div>
               </div>
 
@@ -124,7 +145,7 @@ const Login = () => {
                 </Link>
               </p>
             </div>
-          </div>
+          </GlassmorphicCard>
         </AnimatedTransition>
       </div>
     </div>
